@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FarmIQ Profit Analyzer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h2 { color: green; }
+    table { border-collapse: collapse; width: 80%; margin-top: 20px; }
+    th, td { border: 1px solid #333; padding: 10px; text-align: center; }
+    th { background: green; color: white; }
+    button { background: green; color: white; padding: 8px 15px; cursor: pointer; }
+    button:hover { background: darkgreen; }
+  </style>
+</head>
+<body>
+  <h2>FarmIQ Profit Analyzer</h2>
+
+  <label>Acres of land:</label>
+  <input type="number" id="acres"><br><br>
+
+  <label>Crop:</label>
+  <select id="crop">
+    <option value="Wheat">Wheat</option>
+    <option value="Rice">Rice</option>
+    <option value="Corn">Corn</option>
+  </select><br><br>
+
+  <label>Climate Zone:</label>
+  <select id="climate">
+    <option value="Temperate">Temperate</option>
+    <option value="Tropical">Tropical</option>
+    <option value="Arid">Arid</option>
+  </select><br><br>
+
+  <button onclick="calculateProfit()">Calculate Profit</button>
+
+  <table id="resultsTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Season</th>
+        <th>Estimated Yield</th>
+        <th>Revenue</th>
+        <th>Profit</th>
+      </tr>
+    </thead>
+    <tbody id="resultsBody"></tbody>
+  </table>
+
+  <script>
+    async function calculateProfit() {
+      const acres = document.getElementById("acres").value;
+      const crop = document.getElementById("crop").value;
+      const climate = document.getElementById("climate").value;
+
+      const response = await fetch("http://127.0.0.1:5000/calculate_profit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ acres: acres, crop: crop, climate: climate })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const tbody = document.getElementById("resultsBody");
+        tbody.innerHTML = "";
+        data.results.forEach(r => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${r.season}</td>
+              <td>${r.yield}</td>
+              <td>₹${r.revenue}</td>
+              <td>₹${r.profit}</td>
+            </tr>
+          `;
+        });
+        document.getElementById("resultsTable").style.display = "table";
+      }
+    }
+  </script>
+</body>
+</html>
